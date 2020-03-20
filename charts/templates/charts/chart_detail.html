@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <article class="media content-section">
+        <div class="article-metada">
+            <h1>Cycle {{ object.cycle }}</h1>
+            <p><h3>{{ object.start_date|date:"Y-m-d" }} - {{ object.enddate }}*</h3>
+            <small>*Predicted end date of the period</small>
+            <img src="{{ object.show_chart }}" alt="chart" width=auto height=auto /></p>
+            {% if object.user == user %}
+                <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'chart-update' object.id %}">Edit</a>
+                <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'chart-delete' object.id %}">Delete</a>
+            <p>
+            {% endif %}
+            {% for label, value in object.get_days %}
+                {% if value != None %}
+            <p><b>{{label}}:</b> {{value}}</p>
+                {% endif %}
+            {% endfor %}
+            </p>
+        </div>
+        <h2 class="article-title"></h2>
+    </article>
+{% endblock %}
