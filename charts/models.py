@@ -1,13 +1,11 @@
 import matplotlib
 matplotlib.use("Agg")
 from matplotlib import pyplot as plt
-from io import BytesIO
-import base64
 from datetime import timedelta
 from django.db import models
 from django.utils import timezone  # for timezone.now
 from django.contrib.auth.models import User  # authorize user (seperate table)
-from django.conf import settings
+
 from django.urls import reverse
 
 
@@ -34,13 +32,6 @@ temp_choice = (
 class Day(models.Model):
     date = models.DateField(default=timezone.now, blank=True, null=True)
     temperature = models.FloatField(choices=temp_choice, default=None, blank=True, null=True)
-    bleeding = models.BooleanField(default=False)
-    spotting = models.BooleanField(default=False)
-
-# class DayForm(ModelForm):
-#     class Meta:
-#         day = Day
-#         fields = ['date', 'temperature', 'bleeding', 'spotting']
 
 class Chart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -122,15 +113,3 @@ class Chart(models.Model):
         plt.savefig(name, format='png', width='')
         return '../../../' + name
 
-# class Day(Chart):
-#     date = models.DateField(default=timezone.now, blank=False, null=True)
-#     temperature = models.FloatField(choices=temp_choice, default=36.6)
-#     bleeding = models.BooleanField(default=False)
-#     spotting = models.BooleanField(default=False)
-# user = models.ForeignKey(User, on_delete=models.CASCADE)
-#
-# def __str__(self):
-#     return (self.user, self.date, self.temperature)
-#
-# def get_absolute_url(self):
-#     return reverse('chart-detail', kwargs={'pk': self.pk})
