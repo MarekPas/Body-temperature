@@ -1,8 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin  # dodaje wymóg logowania do klas
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
+# from django.contrib.auth.decorators import login_required
+# from django.contrib import messages
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Chart
 from django.http import JsonResponse
@@ -74,7 +74,7 @@ class ChartDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Chart
     fields = '__all__'
 
-    def test_func(self):  # check if logged user is a user who create
+    def test_func(self):  # checking if logged user is a user who create
         chart = self.get_object()
         if self.request.user == chart.user:
             return True
@@ -85,7 +85,7 @@ class ChartUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     fields = '__all__'
 
 
-    def form_valid(self, form):  # integrity error without it (26min Part10 Django Tutorial)
+    def form_valid(self, form):  # integrity error without it (26min Part10)
         form.instance.user = self.request.user
         return super().form_valid(form)
 

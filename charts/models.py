@@ -1,24 +1,9 @@
-import matplotlib
-matplotlib.use("Agg")
 from matplotlib import pyplot as plt
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.db import models
-from django.utils import timezone  # for timezone.now
+# from django.utils import timezone  # for timezone.now
 from django.contrib.auth.models import User  # authorize user (seperate table)
-
 from django.urls import reverse
-
-
-class Post(models.Model):
-    title = models.CharField(max_length=100)
-    content = models.TextField()
-    date_posted = models.DateTimeField(auto_now_add=True)  # date when object was created, cannot update
-    author = models.ForeignKey(User,
-                               on_delete=models.CASCADE)  # foreignkey bo z drugiej bazy(klasy), delete post if user is deleted
-
-    def __str__(self):  # co ma zwrócić jeśli ktoś się odwowła do obiektu
-        return (self.title)
-
 
 temp_choice = (
     (36.0, ' 36.00 '), (36.05, ' 36.05 '), (36.1, ' 36.10 '), (36.15, ' 36.15 '), (36.2, ' 36.20 '), (36.25, ' 36.25 '),
@@ -29,15 +14,15 @@ temp_choice = (
     (37.5, ' 37.50 '), (37.55, ' 37.55 '), (37.6, ' 37.60 '), (37.65, ' 37.65 '), (37.7, ' 37.70 '), (37.75, ' 37.75 '),
 )
 
-class Day(models.Model):
-    date = models.DateField(default=timezone.now, blank=True, null=True)
-    temperature = models.FloatField(choices=temp_choice, default=None, blank=True, null=True)
+# class Day(models.Model):
+#     date = models.DateField(default=timezone.now, blank=True, null=True)
+#     temperature = models.FloatField(choices=temp_choice, default=None, blank=True, null=True)
 
 class Chart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     cycle = models.IntegerField()
     start_date = models.DateField(blank=False)
-    end_date = models.DateField(blank=True, null=True, name='End date: (format YYYY-MM-DD)')
+    end_date = models.DateField(blank=True, null=True)
     comment = models.CharField(max_length=150, blank=True)
     day1 = models.FloatField(choices=temp_choice, default=None, blank=True, null=True)
     day2 = models.FloatField(choices=temp_choice, default=None, blank=True, null=True)
@@ -86,6 +71,10 @@ class Chart(models.Model):
     def get_absolute_url(self):         # location for a specific chart after chart is created
         return reverse('chart-detail', kwargs={'pk': self.pk})  #
 
+    def get_day(self, day):
+        um = str(day).strip(["d","a","y"])
+        return self.start_date + timedelta(days=int(um))
+
     def get_days(self):
         return [(field.verbose_name, field.value_from_object(self)) for field in self.__class__._meta.fields[6:]]
 
@@ -99,15 +88,16 @@ class Chart(models.Model):
         temps = []
         i = 0
         for day,temp in self.get_days():
-            i= i + 1
+            i += 1
             if temp is None:
                 continue
-            days.append(i)
             temps.append(temp)
+            days.append(i)
         plt.plot(days,temps, marker='o')
         plt.axis([1, 40, 36, 37.40])
         plt.xlabel('Days')
         plt.ylabel('Temperature')
+        plt.title("Chart of the cycle nr " + str(self.cycle) + ". Started " + str(self.start_date))
         plt.grid('True')
         name = 'media/temp_charts/' + str(self.user) +str(self.cycle) + '.png'
         plt.savefig(name, format='png', width='')
