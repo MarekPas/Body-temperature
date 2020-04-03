@@ -3,7 +3,7 @@ from .models import Chart
 from django.utils.translation import gettext_lazy as _
 
 
-class CreateChart(forms.ModelForm):
+class ChartForm(forms.Form):
     class Meta:
         model = Chart
         fields = '__all__'

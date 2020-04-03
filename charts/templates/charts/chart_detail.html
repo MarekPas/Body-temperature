@@ -8,18 +8,19 @@
             {% if object.end_date %}
                 {{ object.end_date|date:"Y-m-d" }}</h3>
             {% else %}
-                {{ object.enddate }}*</h3>
+                {{ object.predicted_enddate }}*</h3>
                 <small>*Predicted end date of the period</small>
             {% endif %}
+            <center>Today is a day nr {{ object.get_today }}</center>
             <img src="{{ object.show_chart }}" alt="chart" width=auto height=auto /></p>
             {% if object.user == user %}
                 <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'chart-update' object.id %}">Edit</a>
                 <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'chart-delete' object.id %}">Delete</a>
             <p>
             {% endif %}
-            {% for label, value in object.get_days %}
+            {% for label, value, date in object.get_days %}
                 {% if value != None %}
-                    <p><b>{{label}}:</b> {{value}}</p>
+                    <p>{{label}} - {{date}}:<b> {{value}}</b></p>
                 {% endif %}
             {% endfor %}
             </p>

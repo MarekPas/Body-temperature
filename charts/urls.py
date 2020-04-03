@@ -1,6 +1,6 @@
 from django.urls import path, reverse
 from django.contrib.auth.decorators import login_required
-from .views import ChartListView, ChartDetailView, ChartCreateView, ChartUpdateView, ChartDeleteView, get_data
+from .views import ChartListView, ChartDetailView, ChartCreateView, ChartUpdateView, ChartDeleteView
 from . import views
 
 urlpatterns = [
@@ -14,5 +14,4 @@ urlpatterns = [
     path('chart/new/', ChartCreateView.as_view(), name='chart-create'),
     # path('chart/<int:pk>/add_temp/', AddTemperature.as_view(), name='add-temp'),
     path('add_chart', views.add_chart, name='add-chart'),
-    path('data/', get_data, name='get-data')
     ]

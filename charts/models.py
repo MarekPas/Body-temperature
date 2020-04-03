@@ -1,9 +1,11 @@
 from matplotlib import pyplot as plt
-from datetime import timedelta, datetime
+from datetime import timedelta, date
 from django.db import models
-# from django.utils import timezone  # for timezone.now
+from django.forms import ModelForm
 from django.contrib.auth.models import User  # authorize user (seperate table)
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
+# from django.utils import timezone
 
 temp_choice = (
     (36.0, ' 36.00 '), (36.05, ' 36.05 '), (36.1, ' 36.10 '), (36.15, ' 36.15 '), (36.2, ' 36.20 '), (36.25, ' 36.25 '),
@@ -13,10 +15,6 @@ temp_choice = (
     (37.2, ' 37.20 '), (37.25, ' 37.25 '), (37.3, ' 37.30 '), (37.35, ' 37.35 '), (37.4, ' 37.40 '), (37.45, ' 37.45 '),
     (37.5, ' 37.50 '), (37.55, ' 37.55 '), (37.6, ' 37.60 '), (37.65, ' 37.65 '), (37.7, ' 37.70 '), (37.75, ' 37.75 '),
 )
-
-# class Day(models.Model):
-#     date = models.DateField(default=timezone.now, blank=True, null=True)
-#     temperature = models.FloatField(choices=temp_choice, default=None, blank=True, null=True)
 
 class Chart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -68,38 +66,63 @@ class Chart(models.Model):
     def __str__(self):
         return (self.user, self.cycle)
 
-    def get_absolute_url(self):         # location for a specific chart after chart is created
+    def get_absolute_url(self):  # location for a specific chart after chart is created
         return reverse('chart-detail', kwargs={'pk': self.pk})  #
 
-    def get_day(self, day):
-        um = str(day).strip(["d","a","y"])
-        return self.start_date + timedelta(days=int(um))
+    def get_today(self):
+        today = date.today() - self.start_date
+        return today.days
 
-    def get_days(self):
-        return [(field.verbose_name, field.value_from_object(self)) for field in self.__class__._meta.fields[6:]]
+    def get_day(self, day):  # change variable dayXX into date from start_date
+        um = day.strip("day")
+        day = self.start_date + timedelta(days=int(um))
+        return str(day)
 
-    def enddate(self):
+    def get_days(self):  # get all days with temperature or not
+        return [(field.verbose_name, field.value_from_object(self), self.get_day(field.verbose_name)) for field in
+                self.__class__._meta.fields[6:]]
+
+    def predicted_enddate(self):
         enddate = self.start_date + timedelta(days=28)
         return str(enddate)
 
     def show_chart(self):
         plt.clf()
-        days  = []
+        days = []
         temps = []
         i = 0
-        for day,temp in self.get_days():
+        for day, temp, datex in self.get_days():
             i += 1
             if temp is None:
                 continue
             temps.append(temp)
             days.append(i)
-        plt.plot(days,temps, marker='o')
+        plt.plot(days, temps, marker='o')
         plt.axis([1, 40, 36, 37.40])
+        plt.axvspan(1, 3, facecolor='red', alpha=0.5)
+        plt.axvspan(11, 17, facecolor='lightgreen', alpha=0.5)
+        plt.axvline(x=28, color="black", alpha=0.5)
         plt.xlabel('Days')
         plt.ylabel('Temperature')
         plt.title("Chart of the cycle nr " + str(self.cycle) + ". Started " + str(self.start_date))
         plt.grid('True')
-        name = 'media/temp_charts/' + str(self.user) +str(self.cycle) + '.png'
+        name = 'media/temp_charts/' + str(self.user) + str(self.cycle) + '.png'
         plt.savefig(name, format='png', width='')
         return '../../../' + name
 
+class ChartForm(ModelForm):
+    class Meta:
+        model = Chart
+        fields = '__all__'
+        exclude = ['user']
+        labels = {
+            'start_date': _('Start date: (format YYYY-MM-DD)')
+        }
+        help_texts = {
+            'start_date': _('End date: (format YYYY-MM-DD)')
+        }
+
+# class Day(models.Model):
+#     date = models.DateField(default=timezone.now(), blank=True, null=True)
+#     temperature = models.FloatField(choices=temp_choice, default=None, blank=True, null=True)
+#     chart = models.ForeignKey(Chart, on_delete=models.CASCADE, related_name='days')

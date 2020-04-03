@@ -5,7 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin  
 # from django.contrib import messages
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Chart
-from django.http import JsonResponse
+# from django.http import JsonResponse
 
 
 def add_chart(request):
@@ -18,14 +18,6 @@ def view_chart(request):
         'title': 'Charts'
     }
     return render(request, 'charts/charts.html', context)
-
-
-def get_data(request, *args, **kwargs):
-    data = {
-        'sales':100,
-        'customers':10,
-    }
-    return JsonResponse(data)   #http response
 
 # def create_chart(request):
 #     if request.method == 'POST':
@@ -50,13 +42,6 @@ class ChartCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):  # integrity error without it (26min Part10 Django Tutorial)
         form.instance.user = self.request.user
         return super().form_valid(form)
-
-    # def test_func(self):  # check if logged user is a user who create
-    #     chart = self.get_object()
-    #     if self.request.user == chart.user:
-    #         return True
-    #     return False
-
 
 class ChartListView(ListView):
     model = Chart
