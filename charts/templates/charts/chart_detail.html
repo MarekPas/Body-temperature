@@ -11,7 +11,7 @@
                 {{ object.predicted_enddate }}*</h3>
                 <small>*Predicted end date of the period</small>
             {% endif %}
-            <center>Today is a day nr {{ object.get_today }}</center>
+            <center>{{ object.get_today }}</center>
             <img src="{{ object.show_chart }}" alt="chart" width=auto height=auto /></p>
             {% if object.user == user %}
                 <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'chart-update' object.id %}">Edit</a>

@@ -70,8 +70,16 @@ class Chart(models.Model):
         return reverse('chart-detail', kwargs={'pk': self.pk})  #
 
     def get_today(self):
-        today = date.today() - self.start_date
-        return today.days
+        today = date.today() - self.start_date  #30
+        if self.end_date is None:
+            if today.days > 40:
+                period_time = "Your period last longer than 40 days. Are you sure it's still not finished?"
+            else:
+                period_time = f"Today is a day nr {today.days}"
+        else:
+            finish = self.end_date - self.start_date
+            period_time = f"Period finished after {finish.days} days"
+        return period_time
 
     def get_day(self, day):  # change variable dayXX into date from start_date
         um = day.strip("day")
@@ -103,6 +111,7 @@ class Chart(models.Model):
         plt.axvspan(11, 17, facecolor='lightgreen', alpha=0.5)
         plt.axvline(x=28, color="black", alpha=0.5)
         plt.xlabel('Days')
+        plt.xticks(rotation=70)
         plt.ylabel('Temperature')
         plt.title("Chart of the cycle nr " + str(self.cycle) + ". Started " + str(self.start_date))
         plt.grid('True')
